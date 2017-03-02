@@ -1,25 +1,53 @@
 package com.uqroute.uqroute;
 
+// Android imports
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.location.Location;
+import android.util.Log;
 import android.view.Window;
 
+// Mapzen imports
 import com.mapzen.android.graphics.MapFragment;
 import com.mapzen.android.graphics.MapzenMap;
 import com.mapzen.android.graphics.OnMapReadyCallback;
 import com.mapzen.tangram.LngLat;
+import com.mapzen.android.lost.api.LostApiClient;
+import com.mapzen.android.lost.api.LocationRequest;
+import com.mapzen.android.lost.api.LocationListener;
+import com.mapzen.android.lost.api.LocationServices;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements
+        LostApiClient.ConnectionCallbacks {
 
 
     private MapzenMap map;
+    private LostApiClient client;
     private boolean enableLocationOnResume = false;
     private boolean queryingPermissions = false;
     static final int FINE_PERMISSION = 0;
+    private static final String TAG = "LOST API";
+
+    LocationListener listener = new LocationListener() {
+        @Override
+        public void onLocationChanged(Location location) {
+            Log.d(TAG, "Location: " + location);
+        }
+
+        @Override
+        public void onProviderDisabled(String provider) {
+            Log.d(TAG, "Location provider disabled: " + provider);
+        }
+
+        @Override
+        public void onProviderEnabled(String provider) {
+            Log.d(TAG, "Location provider enabled: " + provider);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,30 +67,27 @@ public class MainActivity extends AppCompatActivity {
                 map.setRotation(0f);
                 map.setZoom(15f);
                 map.setTilt(0f);
-
-                if (getLocationPermissions()) {
-                    map.setMyLocationEnabled(true);
-                }
             }
         });
-    }
 
-    @Override protected void onPause() {
-        super.onPause();
+        // Setup location services
         if (getLocationPermissions()) {
-            if (map.isMyLocationEnabled()) {
-                map.setMyLocationEnabled(false);
-                enableLocationOnResume = true;
-            }
+            client = new LostApiClient.Builder(this).addConnectionCallbacks(this).build();
+            client.connect();
         }
     }
 
-    @Override protected void onResume() {
+    @Override
+    protected void onPause() {
+        super.onPause();
+        disconnect();
+    }
+
+    @Override
+    protected void onResume() {
         super.onResume();
         if (getLocationPermissions()) {
-            if (enableLocationOnResume) {
-                map.setMyLocationEnabled(true);
-            }
+            connect();
         }
     }
 
@@ -98,5 +123,31 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
+    }
+
+    @Override
+    public void onConnected() {
+        // Called when location services are connected
+        LocationRequest request = LocationRequest.create()
+                .setPriority(LocationRequest.PRIORITY_LOW_POWER)
+                .setInterval(5000)
+                .setSmallestDisplacement(10);
+
+        LocationServices.FusedLocationApi.requestLocationUpdates(client, request, listener);
+    }
+
+    @Override
+    public void onConnectionSuspended() {
+
+    }
+
+    private void connect() {
+        Log.d(TAG, "Location services connecting");
+        client.connect();
+    }
+
+    private void disconnect() {
+        Log.d(TAG, "Location services disconnecting");
+        client.disconnect();
     }
 }
