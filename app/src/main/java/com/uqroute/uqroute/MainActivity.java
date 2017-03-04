@@ -16,6 +16,7 @@ import com.mapzen.android.core.MapzenManager;
 import com.mapzen.android.graphics.MapFragment;
 import com.mapzen.android.graphics.MapzenMap;
 import com.mapzen.android.graphics.OnMapReadyCallback;
+import com.mapzen.android.graphics.model.Marker;
 import com.mapzen.tangram.LngLat;
 import com.mapzen.android.lost.api.LostApiClient;
 import com.mapzen.android.lost.api.LocationRequest;
@@ -27,7 +28,7 @@ public class MainActivity extends AppCompatActivity implements
 
     private MapzenMap map;
     private LostApiClient client;
-    private boolean trackingLocation = false;
+    private boolean trackingLocation = true;
     private boolean queryingPermissions = false;
     static final int FINE_PERMISSION = 0;
     private static final String TAG = "LOST API";
@@ -36,6 +37,7 @@ public class MainActivity extends AppCompatActivity implements
         @Override
         public void onLocationChanged(Location location) {
             Log.d(TAG, "Location: " + location);
+            set_location(new LngLat(location.getLongitude(), location.getLatitude()));
         }
 
         @Override
@@ -57,6 +59,13 @@ public class MainActivity extends AppCompatActivity implements
         //this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
 
+        // Setup location services
+        if (trackingLocation) {
+            if (getLocationPermissions()) {
+                client = new LostApiClient.Builder(this).addConnectionCallbacks(this).build();
+            }
+        }
+
         // Setup api key
         MapzenManager.instance(this).setApiKey("mapzen-RH6Bt1B");
 
@@ -70,15 +79,12 @@ public class MainActivity extends AppCompatActivity implements
                 map.setRotation(0f);
                 map.setZoom(15f);
                 map.setTilt(0f);
+
+                connect();
             }
         });
 
-        if (trackingLocation) {
-            if (getLocationPermissions()) {
-                client = new LostApiClient.Builder(this).addConnectionCallbacks(this).build();
-                connect();
-            }
-        }
+
     }
 
     @Override
@@ -137,11 +143,16 @@ public class MainActivity extends AppCompatActivity implements
     public void onConnected() {
         // Called when location services are connected
         LocationRequest request = LocationRequest.create()
-                .setPriority(LocationRequest.PRIORITY_LOW_POWER)
-                .setInterval(5000)
+                .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY)
+                .setInterval(1000)
                 .setSmallestDisplacement(10);
 
         LocationServices.FusedLocationApi.requestLocationUpdates(client, request, listener);
+
+        // Get current location
+        Location l = LocationServices.FusedLocationApi.getLastLocation(client);
+
+        set_location(new LngLat(l.getLongitude(), l.getLatitude()));
     }
 
     @Override
@@ -150,12 +161,23 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void connect() {
-        Log.d(TAG, "Location services connecting");
-        client.connect();
+        if (trackingLocation) {
+            Log.d(TAG, "Location services connecting");
+            client.connect();
+        }
     }
 
     private void disconnect() {
-        Log.d(TAG, "Location services disconnecting");
-        client.disconnect();
+        if (trackingLocation) {
+            Log.d(TAG, "Location services disconnecting");
+            client.disconnect();
+        }
+    }
+
+    private void set_location(LngLat l) {
+        if (map != null) {
+            map.removeMarker();
+            map.addMarker(new Marker(l.longitude, l.latitude));
+        }
     }
 }
