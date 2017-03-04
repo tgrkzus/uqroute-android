@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.Window;
 
 // Mapzen imports
+import com.mapzen.android.core.MapzenManager;
 import com.mapzen.android.graphics.MapFragment;
 import com.mapzen.android.graphics.MapzenMap;
 import com.mapzen.android.graphics.OnMapReadyCallback;
@@ -24,10 +25,9 @@ import com.mapzen.android.lost.api.LocationServices;
 public class MainActivity extends AppCompatActivity implements
         LostApiClient.ConnectionCallbacks {
 
-
     private MapzenMap map;
     private LostApiClient client;
-    private boolean enableLocationOnResume = false;
+    private boolean trackingLocation = false;
     private boolean queryingPermissions = false;
     static final int FINE_PERMISSION = 0;
     private static final String TAG = "LOST API";
@@ -57,6 +57,9 @@ public class MainActivity extends AppCompatActivity implements
         //this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
 
+        // Setup api key
+        MapzenManager.instance(this).setApiKey("mapzen-RH6Bt1B");
+
         // Setup map
         MapFragment mapFragment = (MapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map_fragment);
@@ -70,24 +73,29 @@ public class MainActivity extends AppCompatActivity implements
             }
         });
 
-        // Setup location services
-        if (getLocationPermissions()) {
-            client = new LostApiClient.Builder(this).addConnectionCallbacks(this).build();
-            client.connect();
+        if (trackingLocation) {
+            if (getLocationPermissions()) {
+                client = new LostApiClient.Builder(this).addConnectionCallbacks(this).build();
+                connect();
+            }
         }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        disconnect();
+        if (trackingLocation) {
+            disconnect();
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (getLocationPermissions()) {
-            connect();
+        if (trackingLocation) {
+            if (getLocationPermissions()) {
+                connect();
+            }
         }
     }
 
