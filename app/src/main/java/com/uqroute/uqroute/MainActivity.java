@@ -1,5 +1,9 @@
 package com.uqroute.uqroute;
 
+// Java imports
+import java.util.List;
+import java.util.ArrayList;
+
 // Android imports
 import android.Manifest;
 import android.content.pm.PackageManager;
@@ -17,6 +21,7 @@ import com.mapzen.android.graphics.MapFragment;
 import com.mapzen.android.graphics.MapzenMap;
 import com.mapzen.android.graphics.OnMapReadyCallback;
 import com.mapzen.android.graphics.model.Marker;
+import com.mapzen.android.graphics.model.Polygon;
 import com.mapzen.tangram.LngLat;
 import com.mapzen.android.lost.api.LostApiClient;
 import com.mapzen.android.lost.api.LocationRequest;
@@ -161,23 +166,28 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void connect() {
-        if (trackingLocation) {
-            Log.d(TAG, "Location services connecting");
-            client.connect();
+        if (map != null) {
+            if (trackingLocation) {
+                Log.d(TAG, "Location services connecting");
+                client.connect();
+                map.setMyLocationEnabled(true);
+            }
         }
     }
 
     private void disconnect() {
-        if (trackingLocation) {
-            Log.d(TAG, "Location services disconnecting");
-            client.disconnect();
+        if (map != null) {
+            if (trackingLocation) {
+                Log.d(TAG, "Location services disconnecting");
+                client.disconnect();
+                map.setMyLocationEnabled(false);
+            }
         }
     }
 
     private void set_location(LngLat l) {
         if (map != null) {
-            map.removeMarker();
-            map.addMarker(new Marker(l.longitude, l.latitude));
+
         }
     }
 }
