@@ -152,10 +152,15 @@ public class MainActivity extends AppCompatActivity implements
                 .setInterval(1000)
                 .setSmallestDisplacement(10);
 
-        LocationServices.FusedLocationApi.requestLocationUpdates(client, request, listener);
+        try {
+            LocationServices.FusedLocationApi.requestLocationUpdates(client, request, listener);
 
-        // Get current location
-        Location l = LocationServices.FusedLocationApi.getLastLocation(client);
+            // Get current location
+            Location l = LocationServices.FusedLocationApi.getLastLocation(client);
+        }
+        catch (SecurityException e) {
+            Log.d(TAG, "Security exception when fetching location" + e.getMessage());
+        }
 
         set_location(new LngLat(l.getLongitude(), l.getLatitude()));
     }
