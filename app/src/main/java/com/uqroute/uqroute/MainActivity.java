@@ -22,27 +22,39 @@ import com.mapzen.android.graphics.MapzenMap;
 import com.mapzen.android.graphics.OnMapReadyCallback;
 import com.mapzen.android.graphics.model.Marker;
 import com.mapzen.android.graphics.model.Polygon;
+import com.mapzen.helpers.RouteEngine;
+import com.mapzen.helpers.RouteListener;
+import com.mapzen.model.ValhallaLocation;
 import com.mapzen.tangram.LngLat;
 import com.mapzen.android.lost.api.LostApiClient;
 import com.mapzen.android.lost.api.LocationRequest;
 import com.mapzen.android.lost.api.LocationListener;
 import com.mapzen.android.lost.api.LocationServices;
+import com.mapzen.android.routing.MapzenRouter;
+import com.mapzen.valhalla.Route;
+import com.mapzen.valhalla.RouteCallback;
+
+import org.jetbrains.annotations.NotNull;
 
 public class MainActivity extends AppCompatActivity implements
         LostApiClient.ConnectionCallbacks {
 
     private MapzenMap map;
     private LostApiClient client;
+    private MapzenRouter router;
+    private Location currentLocation;
     private boolean trackingLocation = true;
     private boolean queryingPermissions = false;
+    private boolean routing = true;
     static final int FINE_PERMISSION = 0;
     private static final String TAG = "LOST API";
+    private static final String ROUTE_TAG = "ROUTING";
 
     LocationListener listener = new LocationListener() {
         @Override
         public void onLocationChanged(Location location) {
             Log.d(TAG, "Location: " + location);
-            set_location(new LngLat(location.getLongitude(), location.getLatitude()));
+            set_location(location);
         }
 
         @Override
@@ -53,6 +65,79 @@ public class MainActivity extends AppCompatActivity implements
         @Override
         public void onProviderEnabled(String provider) {
             Log.d(TAG, "Location provider enabled: " + provider);
+        }
+    };
+
+    // Route engine
+    private RouteEngine routeEngine = new RouteEngine() {
+        @Override
+        public void onLocationChanged(ValhallaLocation location) {
+            super.onLocationChanged(location);
+        }
+
+        @Override
+        public void setRoute(Route route) {
+            super.setRoute(route);
+        }
+
+        @Override
+        public Route getRoute() {
+            return super.getRoute();
+        }
+
+        @Override
+        public void setListener(RouteListener listener) {
+            super.setListener(listener);
+        }
+    };
+
+    // Route listener
+    private RouteListener routeListener = new RouteListener() {
+        @Override
+        public void onRouteStart() {
+            Log.d(ROUTE_TAG, "Route start");
+        }
+
+        @Override
+        public void onRecalculate(ValhallaLocation location) {
+            Log.d(ROUTE_TAG, "Route recalculate");
+            router.clearLocations();
+
+            double[] start = {currentLocation.getLatitude(), currentLocation.getLongitude()};
+            double[] end = {-27.49668, 153.010411};
+            router.setLocation(start);
+            router.setLocation(end);
+            router.fetch();
+        }
+
+        @Override
+        public void onSnapLocation(ValhallaLocation originalLocation, ValhallaLocation snapLocation) {
+            Log.d(ROUTE_TAG, "Route snap location");
+        }
+
+        @Override
+        public void onMilestoneReached(int index, RouteEngine.Milestone milestone) {
+            Log.d(ROUTE_TAG, "Route milestone reached");
+        }
+
+        @Override
+        public void onApproachInstruction(int index) {
+            Log.d(ROUTE_TAG, "Route approaching instruction");
+        }
+
+        @Override
+        public void onInstructionComplete(int index) {
+            Log.d(ROUTE_TAG, "Route instruction complete");
+        }
+
+        @Override
+        public void onUpdateDistance(int distanceToNextInstruction, int distanceToDestination) {
+            Log.d(ROUTE_TAG, "Route update distance");
+        }
+
+        @Override
+        public void onRouteComplete() {
+            Log.d(ROUTE_TAG, "Route complete");
         }
     };
 
@@ -85,6 +170,10 @@ public class MainActivity extends AppCompatActivity implements
                 map.setZoom(15f);
                 map.setTilt(0f);
 
+                // Setup router
+                routeEngine.setListener(routeListener);
+
+                // Connect to location services
                 connect();
             }
         });
@@ -151,18 +240,21 @@ public class MainActivity extends AppCompatActivity implements
                 .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY)
                 .setInterval(1000)
                 .setSmallestDisplacement(10);
-
+        Location l = null;
         try {
             LocationServices.FusedLocationApi.requestLocationUpdates(client, request, listener);
 
             // Get current location
-            Location l = LocationServices.FusedLocationApi.getLastLocation(client);
+            l = LocationServices.FusedLocationApi.getLastLocation(client);
         }
         catch (SecurityException e) {
             Log.d(TAG, "Security exception when fetching location" + e.getMessage());
         }
 
-        set_location(new LngLat(l.getLongitude(), l.getLatitude()));
+        if (l != null) {
+            // Set new location
+            set_location(l);
+        }
     }
 
     @Override
@@ -190,9 +282,47 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    private void set_location(LngLat l) {
-        if (map != null) {
+    private void set_location(Location l) {
+        currentLocation = l;
+        if (map != null && routing) {
+            // Setup/Update routing
+            if (router == null) {
+                router = new MapzenRouter(this);
+                router.setWalking();
+                router.setCallback(new RouteCallback() {
+                    @Override
+                    public void success(Route route) {
+                        Log.d("ROUTING", "Successfully routed");
+                        routeEngine.setRoute(route);
+                        // Generate latlng
+                        List<LngLat> list = new ArrayList<LngLat>();
+                        for (ValhallaLocation l : route.getGeometry()){
+                            list.add(new LngLat(l.getLongitude(), l.getLatitude()));
+                        }
+                        map.drawRouteLine(list);
+                    }
 
+                    @Override
+                    public void failure(int i) {
+                        Log.d("ROUTING", "Failed to route, error: " + i);
+                    }
+                });
+
+                double[] start = {l.getLatitude(), l.getLongitude()};
+                double[] end = {-27.49668, 153.010411};
+                router.setLocation(start);
+                router.setLocation(end);
+                router.fetch();
+            }
+            else {
+                if (routeEngine.getRoute() != null) {
+                    ValhallaLocation loc = new ValhallaLocation();
+                    loc.setBearing(l.getBearing());
+                    loc.setLatitude(l.getLatitude());
+                    loc.setLongitude(l.getLongitude());
+                    routeEngine.onLocationChanged(loc);
+                }
+            }
         }
     }
 }
