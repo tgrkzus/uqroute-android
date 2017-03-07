@@ -103,11 +103,15 @@ public class MainActivity extends AppCompatActivity implements
             Log.d(ROUTE_TAG, "Route recalculate");
             router.clearLocations();
 
+            // Clean current route drawing
+            map.clearRouteLine();
+
             double[] start = {currentLocation.getLatitude(), currentLocation.getLongitude()};
             double[] end = {-27.49668, 153.010411};
             router.setLocation(start);
             router.setLocation(end);
             router.fetch();
+
         }
 
         @Override
@@ -138,6 +142,9 @@ public class MainActivity extends AppCompatActivity implements
         @Override
         public void onRouteComplete() {
             Log.d(ROUTE_TAG, "Route complete");
+
+            // Stop drawing
+            map.clearRouteLine();
         }
     };
 
@@ -150,11 +157,7 @@ public class MainActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_main);
 
         // Setup location services
-        if (trackingLocation) {
-            if (getLocationPermissions()) {
-                client = new LostApiClient.Builder(this).addConnectionCallbacks(this).build();
-            }
-        }
+        initialize_location_services();
 
         // Setup api key
         MapzenManager.instance(this).setApiKey("mapzen-RH6Bt1B");
@@ -181,11 +184,30 @@ public class MainActivity extends AppCompatActivity implements
 
     }
 
+    private void initialize_location_services() {
+        if (trackingLocation) {
+            if (getLocationPermissions()) {
+                client = new LostApiClient.Builder(this).addConnectionCallbacks(this).build();
+            }
+        }
+    }
+
+    private void draw_route(Route r) {
+        // Generate latlng
+        List<LngLat> list = new ArrayList<LngLat>();
+        for (ValhallaLocation l : r.getGeometry()){
+            list.add(new LngLat(l.getLongitude(), l.getLatitude()));
+        }
+        map.drawRouteLine(list);
+    }
+
     @Override
     protected void onPause() {
         super.onPause();
         if (trackingLocation) {
-            disconnect();
+            if (getLocationPermissions()) {
+                disconnect();
+            }
         }
     }
 
@@ -217,8 +239,7 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
     @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
             case FINE_PERMISSION: {
                 queryingPermissions = false;
@@ -226,6 +247,8 @@ public class MainActivity extends AppCompatActivity implements
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // Granted
+                    initialize_location_services();
+                    connect();
                 } else {
                     // Denied
                 }
@@ -265,9 +288,11 @@ public class MainActivity extends AppCompatActivity implements
     private void connect() {
         if (map != null) {
             if (trackingLocation) {
-                Log.d(TAG, "Location services connecting");
-                client.connect();
-                map.setMyLocationEnabled(true);
+                if (getLocationPermissions()) {
+                    Log.d(TAG, "Location services connecting");
+                    client.connect();
+                    map.setMyLocationEnabled(true);
+                }
             }
         }
     }
@@ -275,9 +300,11 @@ public class MainActivity extends AppCompatActivity implements
     private void disconnect() {
         if (map != null) {
             if (trackingLocation) {
-                Log.d(TAG, "Location services disconnecting");
-                client.disconnect();
-                map.setMyLocationEnabled(false);
+                if (getLocationPermissions()) {
+                    Log.d(TAG, "Location services disconnecting");
+                    client.disconnect();
+                    map.setMyLocationEnabled(false);
+                }
             }
         }
     }
@@ -294,12 +321,8 @@ public class MainActivity extends AppCompatActivity implements
                     public void success(Route route) {
                         Log.d("ROUTING", "Successfully routed");
                         routeEngine.setRoute(route);
-                        // Generate latlng
-                        List<LngLat> list = new ArrayList<LngLat>();
-                        for (ValhallaLocation l : route.getGeometry()){
-                            list.add(new LngLat(l.getLongitude(), l.getLatitude()));
-                        }
-                        map.drawRouteLine(list);
+
+                        draw_route(route);
                     }
 
                     @Override
