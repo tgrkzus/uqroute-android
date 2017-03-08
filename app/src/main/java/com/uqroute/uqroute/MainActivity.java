@@ -13,6 +13,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.location.Location;
 import android.util.Log;
+import android.content.Intent;
+import android.widget.Button;
+import android.view.MotionEvent;
+import android.support.v4.view.MotionEventCompat;
 import android.view.Window;
 
 // Mapzen imports
@@ -47,6 +51,7 @@ public class MainActivity extends AppCompatActivity implements
     private boolean queryingPermissions = false;
     private boolean routing = true;
     static final int FINE_PERMISSION = 0;
+    private static final String ACTIVITY_TAG = "MAP ACTIVITY";
     private static final String TAG = "LOST API";
     private static final String ROUTE_TAG = "ROUTING";
 
@@ -103,9 +108,6 @@ public class MainActivity extends AppCompatActivity implements
             Log.d(ROUTE_TAG, "Route recalculate");
             router.clearLocations();
 
-            // Clean current route drawing
-            map.clearRouteLine();
-
             double[] start = {currentLocation.getLatitude(), currentLocation.getLongitude()};
             double[] end = {-27.49668, 153.010411};
             router.setLocation(start);
@@ -152,12 +154,18 @@ public class MainActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        //
+        Intent i = new Intent(this, LocationListActivity.class);
+        startActivity(i);
+
         // Setup content view
         //this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
 
         // Setup location services
         initialize_location_services();
+
+        onSearchRequested();
 
         // Setup api key
         MapzenManager.instance(this).setApiKey("mapzen-RH6Bt1B");
@@ -180,8 +188,6 @@ public class MainActivity extends AppCompatActivity implements
                 connect();
             }
         });
-
-
     }
 
     private void initialize_location_services() {
@@ -193,6 +199,9 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void draw_route(Route r) {
+        // Clean current route drawing
+        map.clearRouteLine();
+
         // Generate latlng
         List<LngLat> list = new ArrayList<LngLat>();
         for (ValhallaLocation l : r.getGeometry()){
