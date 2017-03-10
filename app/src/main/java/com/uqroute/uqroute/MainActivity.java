@@ -18,6 +18,7 @@ import android.widget.Button;
 import android.view.MotionEvent;
 import android.support.v4.view.MotionEventCompat;
 import android.view.Window;
+import android.app.AlertDialog;
 
 // Mapzen imports
 import com.mapzen.android.core.MapzenManager;
@@ -47,10 +48,13 @@ public class MainActivity extends AppCompatActivity implements
     private LostApiClient client;
     private MapzenRouter router;
     private Location currentLocation;
+    private LngLat currentTarget;
     private boolean trackingLocation = true;
     private boolean queryingPermissions = false;
     private boolean routing = true;
-    static final int FINE_PERMISSION = 0;
+
+    private static final int FINE_PERMISSION = 0;
+    private static final int LOCATION_LIST_INTENT_CODE = 0;
     private static final String ACTIVITY_TAG = "MAP ACTIVITY";
     private static final String TAG = "LOST API";
     private static final String ROUTE_TAG = "ROUTING";
@@ -108,12 +112,7 @@ public class MainActivity extends AppCompatActivity implements
             Log.d(ROUTE_TAG, "Route recalculate");
             router.clearLocations();
 
-            double[] start = {currentLocation.getLatitude(), currentLocation.getLongitude()};
-            double[] end = {-27.49668, 153.010411};
-            router.setLocation(start);
-            router.setLocation(end);
-            router.fetch();
-
+            refresh_route();
         }
 
         @Override
@@ -151,12 +150,28 @@ public class MainActivity extends AppCompatActivity implements
     };
 
     @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == RESULT_OK) {
+            if (requestCode == LOCATION_LIST_INTENT_CODE) {
+                //Log.d("TEST", "" + data.getExtras().getDoubleArray("NEW_LOCATION"));
+                double[] info = data.getExtras().getDoubleArray("NEW_LOCATION");
+
+                LngLat loc = new LngLat(info[1], info[0]);
+
+                set_target(loc);
+            }
+        }
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         //
         Intent i = new Intent(this, LocationListActivity.class);
-        startActivity(i);
+        startActivityForResult(i, LOCATION_LIST_INTENT_CODE);
 
         // Setup content view
         //this.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -318,6 +333,21 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
+    private void refresh_route() {
+        router.clearLocations();
+        router.setLocation(new double[] {currentLocation.getLatitude(), currentLocation.getLongitude()});
+        router.setLocation(new double[] {currentTarget.latitude, currentTarget.longitude});
+
+        router.fetch();
+    }
+
+    private void set_target(LngLat p) {
+        Log.d(TAG, "New target set: " + p.latitude + ", " + p.longitude);
+
+        currentTarget = p;
+        refresh_route();
+    }
+
     private void set_location(Location l) {
         currentLocation = l;
         if (map != null && routing) {
@@ -336,7 +366,7 @@ public class MainActivity extends AppCompatActivity implements
 
                     @Override
                     public void failure(int i) {
-                        Log.d("ROUTING", "Failed to route, error: " + i);
+                        Log.d("ROUTING ERROR", "Failed to route, error: " + i);
                     }
                 });
 

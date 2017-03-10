@@ -24,7 +24,20 @@ public class LocationListActivity extends ListActivity {
     protected void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
 
-        Log.d(TAG, "Item " + id + " clicked at " + position);
+        Log.d(TAG, "Item " + id + " clicked: " + l.getItemAtPosition(position));
+
+        // Reroute to new location
+        Intent i = new Intent();
+        double[] data;
+        if (id == 0) {
+            data = new double[] {-27.496361, 153.014117};
+        }
+        else {
+            data = new double[] {-27.49668, 153.010411};
+        }
+        i.putExtra("NEW_LOCATION", data);
+        setResult(RESULT_OK, i);
+        finish();
     }
 
     @Override
