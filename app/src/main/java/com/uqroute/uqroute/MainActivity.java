@@ -177,7 +177,11 @@ public class MainActivity extends AppCompatActivity implements
         // Setup content view
         //this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
-        //setSupportActionBar((Toolbar) findViewById(R.id.my_toolbar));
+        setSupportActionBar((Toolbar) findViewById(R.id.main_toolbar));
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        getSupportActionBar().setDisplayUseLogoEnabled(true);
+        getSupportActionBar().setIcon(R.mipmap.launcher_icon);
+
 
         // Setup location services
         initialize_location_services();
