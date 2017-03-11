@@ -14,6 +14,10 @@ import android.os.Bundle;
 import android.location.Location;
 import android.util.Log;
 import android.content.Intent;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.MenuInflater;
 import android.widget.Button;
 import android.view.MotionEvent;
 import android.support.v4.view.MotionEventCompat;
@@ -169,13 +173,11 @@ public class MainActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //
-        Intent i = new Intent(this, LocationListActivity.class);
-        startActivityForResult(i, LOCATION_LIST_INTENT_CODE);
 
         // Setup content view
         //this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
+        //setSupportActionBar((Toolbar) findViewById(R.id.my_toolbar));
 
         // Setup location services
         initialize_location_services();
@@ -243,6 +245,30 @@ public class MainActivity extends AppCompatActivity implements
                 connect();
             }
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.map_app_bar_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()) {
+            case R.id.action_settings:
+                Log.d(ACTIVITY_TAG, "Settings activated");
+                break;
+            case R.id.action_target:
+                Log.d(ACTIVITY_TAG, "Target menu activated");
+                // Open location menu
+                Intent i = new Intent(this, LocationListActivity.class);
+                startActivityForResult(i, LOCATION_LIST_INTENT_CODE);
+                break;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     protected boolean getLocationPermissions() {

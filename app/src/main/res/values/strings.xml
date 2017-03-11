@@ -2,4 +2,5 @@
     <string name="app_name">UQRoute</string>
     <string name="search_hint">Enter a location</string>
     <string name="action_settings">Settings</string>
+    <string name="action_target">Target Location</string>
 </resources>

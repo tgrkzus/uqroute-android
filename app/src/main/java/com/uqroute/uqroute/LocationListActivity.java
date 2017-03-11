@@ -14,11 +14,32 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.database.Cursor;
 
+// Mapzen Imports
+import com.mapzen.tangram.LngLat;
+
 // Java Imports
 import java.util.List;
+import java.util.ArrayList;
+
+class Location {
+    public Location(String name, double latitude, double longitude) {
+        this.name = name;
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
+
+    String name;
+    double latitude;
+    double longitude;
+}
 
 public class LocationListActivity extends ListActivity {
     static private final String TAG = "LOCATION_LIST";
+
+    static private final Location[] LocList = new Location[] {
+            new Location("Hawken Engineering Building", -27.499968, 153.013774),
+            new Location("Forgen Smith", -27.496928, 153.013072)
+    };
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
@@ -29,12 +50,7 @@ public class LocationListActivity extends ListActivity {
         // Reroute to new location
         Intent i = new Intent();
         double[] data;
-        if (id == 0) {
-            data = new double[] {-27.496361, 153.014117};
-        }
-        else {
-            data = new double[] {-27.49668, 153.010411};
-        }
+        data = new double[] {LocList[(int) id].latitude, LocList[(int) id].longitude};
         i.putExtra("NEW_LOCATION", data);
         setResult(RESULT_OK, i);
         finish();
@@ -49,13 +65,11 @@ public class LocationListActivity extends ListActivity {
        // ListView l = (ListView) this.findViewById(R.id.st);
 
         // Populate list
-        String[] values = new String[] {
-                "Item 1",
-                "Item 2",
-                "Item 3",
-                "Item 4",
-                "Item 5",
-                "Item 6"};
+        List<String> values = new ArrayList<>();
+        for (Location b : LocList) {
+            values.add(b.name);
+        }
+
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_list_item_1, values);
 
