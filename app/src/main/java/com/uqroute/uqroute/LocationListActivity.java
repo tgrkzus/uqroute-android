@@ -28,6 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 
 class Location {
     public Location(String name, double latitude, double longitude) {
@@ -123,6 +124,14 @@ public class LocationListActivity extends ListActivity {
             e.printStackTrace();
             return null;
         }
+
+        // Sort list of locations alphabetically
+        Collections.sort(l, new Comparator<Location>() {
+            @Override
+            public int compare(Location lhs, Location rhs) {
+                return lhs.name.compareToIgnoreCase(rhs.name);
+            }
+        });
 
         return l;
     }
