@@ -18,19 +18,12 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuInflater;
-import android.widget.Button;
-import android.view.MotionEvent;
-import android.support.v4.view.MotionEventCompat;
-import android.view.Window;
-import android.app.AlertDialog;
 
 // Mapzen imports
 import com.mapzen.android.core.MapzenManager;
 import com.mapzen.android.graphics.MapFragment;
 import com.mapzen.android.graphics.MapzenMap;
 import com.mapzen.android.graphics.OnMapReadyCallback;
-import com.mapzen.android.graphics.model.Marker;
-import com.mapzen.android.graphics.model.Polygon;
 import com.mapzen.helpers.RouteEngine;
 import com.mapzen.helpers.RouteListener;
 import com.mapzen.model.ValhallaLocation;
@@ -42,8 +35,6 @@ import com.mapzen.android.lost.api.LocationServices;
 import com.mapzen.android.routing.MapzenRouter;
 import com.mapzen.valhalla.Route;
 import com.mapzen.valhalla.RouteCallback;
-
-import org.jetbrains.annotations.NotNull;
 
 public class MainActivity extends AppCompatActivity implements
         LostApiClient.ConnectionCallbacks {
@@ -66,18 +57,24 @@ public class MainActivity extends AppCompatActivity implements
     LocationListener listener = new LocationListener() {
         @Override
         public void onLocationChanged(Location location) {
-            Log.d(TAG, "Location: " + location);
+            if (Globals.DEBUG) {
+                Log.d(TAG, "Location: " + location);
+            }
             set_location(location);
         }
 
         @Override
         public void onProviderDisabled(String provider) {
-            Log.d(TAG, "Location provider disabled: " + provider);
+            if (Globals.DEBUG) {
+                Log.d(TAG, "Location provider disabled: " + provider);
+            }
         }
 
         @Override
         public void onProviderEnabled(String provider) {
-            Log.d(TAG, "Location provider enabled: " + provider);
+            if (Globals.DEBUG) {
+                Log.d(TAG, "Location provider enabled: " + provider);
+            }
         }
     };
 
@@ -108,12 +105,16 @@ public class MainActivity extends AppCompatActivity implements
     private RouteListener routeListener = new RouteListener() {
         @Override
         public void onRouteStart() {
-            Log.d(ROUTE_TAG, "Route start");
+            if (Globals.DEBUG) {
+                Log.d(ROUTE_TAG, "Route start");
+            }
         }
 
         @Override
         public void onRecalculate(ValhallaLocation location) {
-            Log.d(ROUTE_TAG, "Route recalculate");
+            if (Globals.DEBUG) {
+                Log.d(ROUTE_TAG, "Route recalculate");
+            }
             router.clearLocations();
 
             refresh_route();
@@ -121,32 +122,44 @@ public class MainActivity extends AppCompatActivity implements
 
         @Override
         public void onSnapLocation(ValhallaLocation originalLocation, ValhallaLocation snapLocation) {
-            Log.d(ROUTE_TAG, "Route snap location");
+            if (Globals.DEBUG) {
+                Log.d(ROUTE_TAG, "Route snap location");
+            }
         }
 
         @Override
         public void onMilestoneReached(int index, RouteEngine.Milestone milestone) {
-            Log.d(ROUTE_TAG, "Route milestone reached");
+            if (Globals.DEBUG) {
+                Log.d(ROUTE_TAG, "Route milestone reached");
+            }
         }
 
         @Override
         public void onApproachInstruction(int index) {
-            Log.d(ROUTE_TAG, "Route approaching instruction");
+            if (Globals.DEBUG) {
+                Log.d(ROUTE_TAG, "Route approaching instruction");
+            }
         }
 
         @Override
         public void onInstructionComplete(int index) {
-            Log.d(ROUTE_TAG, "Route instruction complete");
+            if (Globals.DEBUG) {
+                Log.d(ROUTE_TAG, "Route instruction complete");
+            }
         }
 
         @Override
         public void onUpdateDistance(int distanceToNextInstruction, int distanceToDestination) {
-            Log.d(ROUTE_TAG, "Route update distance");
+            if (Globals.DEBUG) {
+                Log.d(ROUTE_TAG, "Route update distance");
+            }
         }
 
         @Override
         public void onRouteComplete() {
-            Log.d(ROUTE_TAG, "Route complete");
+            if (Globals.DEBUG) {
+                Log.d(ROUTE_TAG, "Route complete");
+            }
 
             // Stop drawing
             map.clearRouteLine();
@@ -262,10 +275,14 @@ public class MainActivity extends AppCompatActivity implements
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
             case R.id.action_settings:
-                Log.d(ACTIVITY_TAG, "Settings activated");
+                if (Globals.DEBUG) {
+                    Log.d(ACTIVITY_TAG, "Settings activated");
+                }
                 break;
             case R.id.action_target:
-                Log.d(ACTIVITY_TAG, "Target menu activated");
+                if (Globals.DEBUG) {
+                    Log.d(ACTIVITY_TAG, "Target menu activated");
+                }
                 // Open location menu
                 Intent i = new Intent(this, LocationListActivity.class);
                 startActivityForResult(i, LOCATION_LIST_INTENT_CODE);
@@ -325,7 +342,9 @@ public class MainActivity extends AppCompatActivity implements
             l = LocationServices.FusedLocationApi.getLastLocation(client);
         }
         catch (SecurityException e) {
-            Log.d(TAG, "Security exception when fetching location" + e.getMessage());
+            if (Globals.DEBUG) {
+                Log.d(TAG, "Security exception when fetching location" + e.getMessage());
+            }
         }
 
         if (l != null) {
@@ -343,7 +362,9 @@ public class MainActivity extends AppCompatActivity implements
         if (map != null) {
             if (trackingLocation) {
                 if (getLocationPermissions()) {
-                    Log.d(TAG, "Location services connecting");
+                    if (Globals.DEBUG) {
+                        Log.d(TAG, "Location services connecting");
+                    }
                     client.connect();
                     map.setMyLocationEnabled(true);
                 }
@@ -355,7 +376,9 @@ public class MainActivity extends AppCompatActivity implements
         if (map != null) {
             if (trackingLocation) {
                 if (getLocationPermissions()) {
-                    Log.d(TAG, "Location services disconnecting");
+                    if (Globals.DEBUG) {
+                        Log.d(TAG, "Location services disconnecting");
+                    }
                     client.disconnect();
                     map.setMyLocationEnabled(false);
                 }
@@ -372,7 +395,9 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void set_target(LngLat p) {
-        Log.d(TAG, "New target set: " + p.latitude + ", " + p.longitude);
+        if (Globals.DEBUG) {
+            Log.d(TAG, "New target set: " + p.latitude + ", " + p.longitude);
+        }
 
         currentTarget = p;
         refresh_route();
@@ -388,7 +413,9 @@ public class MainActivity extends AppCompatActivity implements
                 router.setCallback(new RouteCallback() {
                     @Override
                     public void success(Route route) {
-                        Log.d("ROUTING", "Successfully routed");
+                        if (Globals.DEBUG) {
+                            Log.d("ROUTING", "Successfully routed");
+                        }
                         routeEngine.setRoute(route);
 
                         draw_route(route);

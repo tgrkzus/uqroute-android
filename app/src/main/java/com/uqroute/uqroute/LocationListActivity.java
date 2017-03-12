@@ -1,5 +1,7 @@
 package com.uqroute.uqroute;
 
+import com.uqroute.uqroute.Globals;
+
 // Android Imports
 import android.app.ListActivity;
 import android.app.LoaderManager;
@@ -50,7 +52,9 @@ public class LocationListActivity extends ListActivity {
     protected void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
 
-        Log.d(TAG, "Item " + id + " clicked: " + l.getItemAtPosition(position));
+        if (Globals.DEBUG) {
+            Log.d(TAG, "Item " + id + " clicked: " + l.getItemAtPosition(position));
+        }
 
         // Reroute to new location
         Intent i = new Intent();
@@ -65,7 +69,9 @@ public class LocationListActivity extends ListActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_location_list);
-        Log.d(TAG, "Location list initialized");
+        if (Globals.DEBUG) {
+            Log.d(TAG, "Location list initialized");
+        }
 
        // ListView l = (ListView) this.findViewById(R.id.st);
 
@@ -98,12 +104,15 @@ public class LocationListActivity extends ListActivity {
             json = new String(buffer, "UTF-8");
         }
         catch (IOException e) {
-            Log.d(TAG, "Location JSON unsuccessfully fetched");
-            e.printStackTrace();
+            if (Globals.DEBUG) {
+                Log.d(TAG, "Location JSON unsuccessfully fetched");
+                e.printStackTrace();
+            }
             return null;
         }
-        Log.d(TAG, "Location JSON fetched");
-
+        if (Globals.DEBUG) {
+            Log.d(TAG, "Location JSON fetched");
+        }
         ArrayList<Location> l = new ArrayList<>();
 
         try {
@@ -120,8 +129,10 @@ public class LocationListActivity extends ListActivity {
             }
         }
         catch (JSONException e) {
-            Log.d(TAG, "JSON parsing failure");
-            e.printStackTrace();
+            if (Globals.DEBUG) {
+                Log.d(TAG, "JSON parsing failure");
+                e.printStackTrace();
+            }
             return null;
         }
 
