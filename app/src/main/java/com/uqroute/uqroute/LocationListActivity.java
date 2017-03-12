@@ -16,10 +16,18 @@ import android.database.Cursor;
 
 // Mapzen Imports
 import com.mapzen.tangram.LngLat;
+import com.mapzen.valhalla.JSON;
 
 // Java Imports
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Collections;
 
 class Location {
     public Location(String name, double latitude, double longitude) {
@@ -35,11 +43,7 @@ class Location {
 
 public class LocationListActivity extends ListActivity {
     static private final String TAG = "LOCATION_LIST";
-
-    static private final Location[] LocList = new Location[] {
-            new Location("Hawken Engineering Building", -27.499968, 153.013774),
-            new Location("Forgen Smith", -27.496928, 153.013072)
-    };
+    static private List<Location> locations;
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
@@ -50,7 +54,7 @@ public class LocationListActivity extends ListActivity {
         // Reroute to new location
         Intent i = new Intent();
         double[] data;
-        data = new double[] {LocList[(int) id].latitude, LocList[(int) id].longitude};
+        data = new double[] {locations.get((int) id).latitude, locations.get((int) id).longitude};
         i.putExtra("NEW_LOCATION", data);
         setResult(RESULT_OK, i);
         finish();
@@ -64,9 +68,10 @@ public class LocationListActivity extends ListActivity {
 
        // ListView l = (ListView) this.findViewById(R.id.st);
 
-        // Populate list
+        // Populate list (TODO error handling better)
+        locations = fetch_json();
         List<String> values = new ArrayList<>();
-        for (Location b : LocList) {
+        for (Location b : locations) {
             values.add(b.name);
         }
 
@@ -74,5 +79,51 @@ public class LocationListActivity extends ListActivity {
                 android.R.layout.simple_list_item_1, values);
 
         setListAdapter(adapter);
+    }
+
+    static private final Location[] LocList = new Location[] {
+            new Location("Hawken Engineering Building", -27.499968, 153.013774),
+            new Location("Forgen Smith", -27.496928, 153.013072)
+    };
+    private ArrayList<Location> fetch_json() {
+        String json;
+        try {
+            InputStream is = getAssets().open("location.cache");
+
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+            json = new String(buffer, "UTF-8");
+        }
+        catch (IOException e) {
+            Log.d(TAG, "Location JSON unsuccessfully fetched");
+            e.printStackTrace();
+            return null;
+        }
+        Log.d(TAG, "Location JSON fetched");
+
+        ArrayList<Location> l = new ArrayList<>();
+
+        try {
+            JSONObject o = new JSONObject(json);
+            Iterator<?> keys = o.keys();
+            while (keys.hasNext()) {
+                String key = (String) keys.next();
+                if (o.get(key) instanceof JSONObject) {
+                    double latitude = (double) ((JSONObject) o.get(key)).get("latitude");
+                    double longitude = (double) ((JSONObject) o.get(key)).get("longitude");
+                    String name = (String) ((JSONObject) o.get(key)).get("title");
+                    l.add(new Location(name, latitude, longitude));
+                }
+            }
+        }
+        catch (JSONException e) {
+            Log.d(TAG, "JSON parsing failure");
+            e.printStackTrace();
+            return null;
+        }
+
+        return l;
     }
 }
