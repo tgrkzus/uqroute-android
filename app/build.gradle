@@ -1,30 +1,12 @@
-Properties props = new Properties()
-File propsFile = file('../keys.properties')
-if (propsFile.exists()) {
-    props.load(propsFile.newDataInputStream())
-} else if (System.env.STORE_FILE != null &&
-        System.env.KEY_PASS != null &&
-        System.env.STORE_PASS != null &&
-        System.env.MAPZEN_KEY_DEV != null &&
-        System.env.MAPZEN_KEY_PROD != null) {
-    props.setProperty("storeFile", System.env.STORE_PASS)
-    props.setProperty("keyPass", System.env.KEY_PASS)
-    props.setProperty("storePass", System.env.STORE_PASS)
-    props.setProperty("mapzenKeyDev", System.env.MAPZEN_KEY_DEV)
-    props.setProperty("mapzenKeyProd", System.env.MAPZEN_KEY_PROD)
-} else {
-    throw new GradleException("local.properties doesn't exist or doesn't have all keys defined")
-}
-
 apply plugin: 'com.android.application'
 
 android {
     signingConfigs {
         config {
             keyAlias 'release_key'
-            keyPassword "\"${props.getProperty("keyPass")}\""
-            storeFile file("\"${props.getProperty("storeFile")}\"")
-            storePassword "\"${props.getProperty("storePass")}\""
+            keyPassword KEY_PASS
+            storeFile file(STORE_FILE)
+            storePassword STORE_PASS
         }
     }
     compileSdkVersion 25
@@ -45,11 +27,11 @@ android {
 
         debug {
             //buildConfigField BOOLEAN, "DEBUG", TRUE
-            buildConfigField STRING, "MAPZEN_KEY", "\"${props.getProperty("mapzenDev")}\""
+            buildConfigField STRING, "MAPZEN_KEY", "\"${MAPZEN_KEY_DEV}\""
         }
         release {
             //buildConfigField BOOLEAN, "DEBUG", FALSE
-            buildConfigField STRING, "MAPZEN_KEY", "\"${props.getProperty("mapzenProd")}\""
+            buildConfigField STRING, "MAPZEN_KEY", "\"${MAPZEN_KEY_PROD}\""
 
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
