@@ -72,7 +72,7 @@ public class LocationListActivity extends ListActivity {
         locations = fetch_json();
         List<String> values = new ArrayList<>();
         for (Location b : locations) {
-            values.add(b.name + " | " + b.buildingNum);
+            values.add(b.buildingNum + " | " + b.name);
         }
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
@@ -129,7 +129,7 @@ public class LocationListActivity extends ListActivity {
         Collections.sort(l, new Comparator<Location>() {
             @Override
             public int compare(Location lhs, Location rhs) {
-                return lhs.buildingNum.compareToIgnoreCase(rhs.buildingNum);
+                return lhs.name.compareToIgnoreCase(rhs.name);
             }
         });
 

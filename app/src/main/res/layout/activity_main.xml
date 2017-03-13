@@ -4,7 +4,6 @@
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginTop="?attr/actionBarSize"
     tools:context="com.uqroute.uqroute.MainActivity">
 
     <android.support.v7.widget.Toolbar
@@ -19,5 +18,6 @@
         android:id="@+id/map_fragment"
         android:name="com.mapzen.android.graphics.MapFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:layout_below="@+id/main_toolbar" />
 </RelativeLayout>

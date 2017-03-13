@@ -6,8 +6,8 @@ The Mapzen SDK provides rendering, routing and location services through it's im
 # Build Instructions
 Assuming you have Android Studio installed and setup, first clone this repo. You will then need to do the following:
 
-1. Create a gradle.properties file in the root directory of the project (Best to open the project in Android Studio and let it auto generate the file for you)
-2. Add the following constants to the properties file: (e.g. ```MAPZEN_KEY_DEV = mapzen-XXXXXXX```):
+1. Create a gradle.properties file in the root directory of the project (Best to open the project in Android Studio and create a new "Resource Bundle" with the appropriate name
+2. Add the following constants to the properties file: (e.g. ```MAPZEN_KEY_DEV = mapzen-XXXXXX```):
 3. Mapzen keys: ```MAPZEN_KEY_DEV```, ```MAPZEN_KEY_PROD```:
  * You will need to get these from the [Mapzen website](https://mapzen.com), generating keys is free with rather generous limits. All you need to do is login with your Github account. These keys are neccessary to draw the map and provide routing services
 4. Signing keys: ```KEY_PASS```, ```STORE_FILE```, ```STORE_PASS```:
