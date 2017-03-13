@@ -24,13 +24,15 @@ import java.util.Collections;
 import java.util.Comparator;
 
 class Location {
-    public Location(String name, double latitude, double longitude) {
+    public Location(String name, String buildingNum, double latitude, double longitude) {
         this.name = name;
+        this.buildingNum = buildingNum;
         this.latitude = latitude;
         this.longitude = longitude;
     }
 
     String name;
+    String buildingNum;
     double latitude;
     double longitude;
 }
@@ -64,13 +66,13 @@ public class LocationListActivity extends ListActivity {
             Log.d(TAG, "Location list initialized");
         }
 
-       // ListView l = (ListView) this.findViewById(R.id.st);
+        // ListView l = (ListView) this.findViewById(R.id.st);
 
         // Populate list (TODO error handling better)
         locations = fetch_json();
         List<String> values = new ArrayList<>();
         for (Location b : locations) {
-            values.add(b.name);
+            values.add(b.name + " | " + b.buildingNum);
         }
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
@@ -79,10 +81,6 @@ public class LocationListActivity extends ListActivity {
         setListAdapter(adapter);
     }
 
-    static private final Location[] LocList = new Location[] {
-            new Location("Hawken Engineering Building", -27.499968, 153.013774),
-            new Location("Forgen Smith", -27.496928, 153.013072)
-    };
     private ArrayList<Location> fetch_json() {
         String json;
         try {
@@ -115,7 +113,7 @@ public class LocationListActivity extends ListActivity {
                     double latitude = (double) ((JSONObject) o.get(key)).get("latitude");
                     double longitude = (double) ((JSONObject) o.get(key)).get("longitude");
                     String name = (String) ((JSONObject) o.get(key)).get("title");
-                    l.add(new Location(name, latitude, longitude));
+                    l.add(new Location(name, key, latitude, longitude));
                 }
             }
         }
@@ -131,7 +129,7 @@ public class LocationListActivity extends ListActivity {
         Collections.sort(l, new Comparator<Location>() {
             @Override
             public int compare(Location lhs, Location rhs) {
-                return lhs.name.compareToIgnoreCase(rhs.name);
+                return lhs.buildingNum.compareToIgnoreCase(rhs.buildingNum);
             }
         });
 

@@ -44,11 +44,11 @@ android {
         def FALSE = "false"
 
         debug {
-            buildConfigField BOOLEAN, "DEBUG", TRUE
+            //buildConfigField BOOLEAN, "DEBUG", TRUE
             buildConfigField STRING, "MAPZEN_KEY", "\"${props.getProperty("mapzenDev")}\""
         }
         release {
-            buildConfigField BOOLEAN, "DEBUG", FALSE
+            //buildConfigField BOOLEAN, "DEBUG", FALSE
             buildConfigField STRING, "MAPZEN_KEY", "\"${props.getProperty("mapzenProd")}\""
 
             minifyEnabled false
