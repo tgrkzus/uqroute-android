@@ -1,0 +1,75 @@
+Properties props = new Properties()
+File propsFile = file('../local.properties')
+if (propsFile.exists()) {
+    props.load(propsFile.newDataInputStream())
+} else if (System.env.STORE_FILE != null &&
+        System.env.KEY_PASS != null &&
+        System.env.STORE_PASS != null &&
+        System.env.MAPZEN_KEY_DEV &&
+        System.env.MAPZEN_KEY_PROD) {
+    props.setProperty("storeFile", System.env.STORE_FILE)
+    props.setProperty("keyPass", System.env.KEY_PASS)
+    props.setProperty("storePass", System.env.STORE_PASS)
+    props.setProperty("mapzenKeyDev", System.env.STORE_PASS)
+    props.setProperty("mapzenKeyProd", System.env.STORE_PASS)
+} else {
+    throw new GradleException("local.properties doesn't exist or doesn't have all keys defined")
+}
+
+apply plugin: 'com.android.application'
+
+android {
+    signingConfigs {
+        config {
+            keyAlias 'release_key'
+            keyPassword "\"${props.getProperty("keyPass")}\""
+            storeFile file("\"${props.getProperty("storeFile")}\"")
+            storePassword "\"${props.getProperty("storePass")}\""
+        }
+    }
+    compileSdkVersion 25
+    buildToolsVersion "25.0.2"
+    defaultConfig {
+        applicationId "com.uqroute.uqroute"
+        minSdkVersion 15
+        targetSdkVersion 25
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        def BOOLEAN = "boolean"
+        def STRING = "String"
+        def TRUE = "true"
+        def FALSE = "false"
+
+        debug {
+            buildConfigField BOOLEAN, "DEBUG", TRUE
+            buildConfigField STRING, "MAPZEN_KEY", "\"${props.getProperty("mapzenDev")}\""
+        }
+        release {
+            buildConfigField BOOLEAN, "DEBUG", FALSE
+            buildConfigField STRING, "MAPZEN_KEY", "\"${props.getProperty("mapzenProd")}\""
+
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    compile 'com.android.support:appcompat-v7:25.2.0'
+    compile 'com.mapzen:mapzen-android-sdk:1.3.2'
+    compile 'com.android.support:support-v4:25.2.0'
+    compile 'com.android.support:design:25.2.0'
+    testCompile 'junit:junit:4.12'
+}

@@ -1,24 +1,15 @@
 package com.uqroute.uqroute;
 
-import com.uqroute.uqroute.Globals;
-
 // Android Imports
 import android.app.ListActivity;
-import android.app.LoaderManager;
-import android.content.Loader;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
+        import android.os.Bundle;
 import android.content.Intent;
-import android.app.SearchManager;
-import android.util.Log;
+        import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.database.Cursor;
 
 // Mapzen Imports
-import com.mapzen.tangram.LngLat;
-import com.mapzen.valhalla.JSON;
 
 // Java Imports
 import org.json.JSONException;
@@ -52,7 +43,7 @@ public class LocationListActivity extends ListActivity {
     protected void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
 
-        if (Globals.DEBUG) {
+        if (BuildConfig.DEBUG) {
             Log.d(TAG, "Item " + id + " clicked: " + l.getItemAtPosition(position));
         }
 
@@ -69,7 +60,7 @@ public class LocationListActivity extends ListActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_location_list);
-        if (Globals.DEBUG) {
+        if (BuildConfig.DEBUG) {
             Log.d(TAG, "Location list initialized");
         }
 
@@ -104,13 +95,13 @@ public class LocationListActivity extends ListActivity {
             json = new String(buffer, "UTF-8");
         }
         catch (IOException e) {
-            if (Globals.DEBUG) {
+            if (BuildConfig.DEBUG) {
                 Log.d(TAG, "Location JSON unsuccessfully fetched");
                 e.printStackTrace();
             }
             return null;
         }
-        if (Globals.DEBUG) {
+        if (BuildConfig.DEBUG) {
             Log.d(TAG, "Location JSON fetched");
         }
         ArrayList<Location> l = new ArrayList<>();
@@ -129,7 +120,7 @@ public class LocationListActivity extends ListActivity {
             }
         }
         catch (JSONException e) {
-            if (Globals.DEBUG) {
+            if (BuildConfig.DEBUG) {
                 Log.d(TAG, "JSON parsing failure");
                 e.printStackTrace();
             }

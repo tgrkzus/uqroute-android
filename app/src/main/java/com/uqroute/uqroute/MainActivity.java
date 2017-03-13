@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements
     LocationListener listener = new LocationListener() {
         @Override
         public void onLocationChanged(Location location) {
-            if (Globals.DEBUG) {
+            if (BuildConfig.DEBUG) {
                 Log.d(TAG, "Location: " + location);
             }
             set_location(location);
@@ -65,14 +65,14 @@ public class MainActivity extends AppCompatActivity implements
 
         @Override
         public void onProviderDisabled(String provider) {
-            if (Globals.DEBUG) {
+            if (BuildConfig.DEBUG) {
                 Log.d(TAG, "Location provider disabled: " + provider);
             }
         }
 
         @Override
         public void onProviderEnabled(String provider) {
-            if (Globals.DEBUG) {
+            if (BuildConfig.DEBUG) {
                 Log.d(TAG, "Location provider enabled: " + provider);
             }
         }
@@ -105,14 +105,14 @@ public class MainActivity extends AppCompatActivity implements
     private RouteListener routeListener = new RouteListener() {
         @Override
         public void onRouteStart() {
-            if (Globals.DEBUG) {
+            if (BuildConfig.DEBUG) {
                 Log.d(ROUTE_TAG, "Route start");
             }
         }
 
         @Override
         public void onRecalculate(ValhallaLocation location) {
-            if (Globals.DEBUG) {
+            if (BuildConfig.DEBUG) {
                 Log.d(ROUTE_TAG, "Route recalculate");
             }
             router.clearLocations();
@@ -122,42 +122,42 @@ public class MainActivity extends AppCompatActivity implements
 
         @Override
         public void onSnapLocation(ValhallaLocation originalLocation, ValhallaLocation snapLocation) {
-            if (Globals.DEBUG) {
+            if (BuildConfig.DEBUG) {
                 Log.d(ROUTE_TAG, "Route snap location");
             }
         }
 
         @Override
         public void onMilestoneReached(int index, RouteEngine.Milestone milestone) {
-            if (Globals.DEBUG) {
+            if (BuildConfig.DEBUG) {
                 Log.d(ROUTE_TAG, "Route milestone reached");
             }
         }
 
         @Override
         public void onApproachInstruction(int index) {
-            if (Globals.DEBUG) {
+            if (BuildConfig.DEBUG) {
                 Log.d(ROUTE_TAG, "Route approaching instruction");
             }
         }
 
         @Override
         public void onInstructionComplete(int index) {
-            if (Globals.DEBUG) {
+            if (BuildConfig.DEBUG) {
                 Log.d(ROUTE_TAG, "Route instruction complete");
             }
         }
 
         @Override
         public void onUpdateDistance(int distanceToNextInstruction, int distanceToDestination) {
-            if (Globals.DEBUG) {
+            if (BuildConfig.DEBUG) {
                 Log.d(ROUTE_TAG, "Route update distance");
             }
         }
 
         @Override
         public void onRouteComplete() {
-            if (Globals.DEBUG) {
+            if (BuildConfig.DEBUG) {
                 Log.d(ROUTE_TAG, "Route complete");
             }
 
@@ -202,7 +202,7 @@ public class MainActivity extends AppCompatActivity implements
         onSearchRequested();
 
         // Setup api key
-        MapzenManager.instance(this).setApiKey("mapzen-RH6Bt1B");
+        MapzenManager.instance(this).setApiKey(BuildConfig.MAPZEN_KEY);
 
         // Setup map
         MapFragment mapFragment = (MapFragment) getSupportFragmentManager()
@@ -275,12 +275,12 @@ public class MainActivity extends AppCompatActivity implements
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
             case R.id.action_settings:
-                if (Globals.DEBUG) {
+                if (BuildConfig.DEBUG) {
                     Log.d(ACTIVITY_TAG, "Settings activated");
                 }
                 break;
             case R.id.action_target:
-                if (Globals.DEBUG) {
+                if (BuildConfig.DEBUG) {
                     Log.d(ACTIVITY_TAG, "Target menu activated");
                 }
                 // Open location menu
@@ -342,7 +342,7 @@ public class MainActivity extends AppCompatActivity implements
             l = LocationServices.FusedLocationApi.getLastLocation(client);
         }
         catch (SecurityException e) {
-            if (Globals.DEBUG) {
+            if (BuildConfig.DEBUG) {
                 Log.d(TAG, "Security exception when fetching location" + e.getMessage());
             }
         }
@@ -362,7 +362,7 @@ public class MainActivity extends AppCompatActivity implements
         if (map != null) {
             if (trackingLocation) {
                 if (getLocationPermissions()) {
-                    if (Globals.DEBUG) {
+                    if (BuildConfig.DEBUG) {
                         Log.d(TAG, "Location services connecting");
                     }
                     client.connect();
@@ -376,7 +376,7 @@ public class MainActivity extends AppCompatActivity implements
         if (map != null) {
             if (trackingLocation) {
                 if (getLocationPermissions()) {
-                    if (Globals.DEBUG) {
+                    if (BuildConfig.DEBUG) {
                         Log.d(TAG, "Location services disconnecting");
                     }
                     client.disconnect();
@@ -395,7 +395,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void set_target(LngLat p) {
-        if (Globals.DEBUG) {
+        if (BuildConfig.DEBUG) {
             Log.d(TAG, "New target set: " + p.latitude + ", " + p.longitude);
         }
 
@@ -413,7 +413,7 @@ public class MainActivity extends AppCompatActivity implements
                 router.setCallback(new RouteCallback() {
                     @Override
                     public void success(Route route) {
-                        if (Globals.DEBUG) {
+                        if (BuildConfig.DEBUG) {
                             Log.d("ROUTING", "Successfully routed");
                         }
                         routeEngine.setRoute(route);
