@@ -5,13 +5,13 @@ if (propsFile.exists()) {
 } else if (System.env.STORE_FILE != null &&
         System.env.KEY_PASS != null &&
         System.env.STORE_PASS != null &&
-        System.env.MAPZEN_KEY_DEV &&
-        System.env.MAPZEN_KEY_PROD) {
-    props.setProperty("storeFile", System.env.STORE_FILE)
+        System.env.MAPZEN_KEY_DEV != null &&
+        System.env.MAPZEN_KEY_PROD != null) {
+    props.setProperty("storeFile", System.env.STORE_PASS)
     props.setProperty("keyPass", System.env.KEY_PASS)
     props.setProperty("storePass", System.env.STORE_PASS)
-    props.setProperty("mapzenKeyDev", System.env.STORE_PASS)
-    props.setProperty("mapzenKeyProd", System.env.STORE_PASS)
+    props.setProperty("mapzenKeyDev", System.env.MAPZEN_KEY_DEV)
+    props.setProperty("mapzenKeyProd", System.env.MAPZEN_KEY_PROD)
 } else {
     throw new GradleException("local.properties doesn't exist or doesn't have all keys defined")
 }
