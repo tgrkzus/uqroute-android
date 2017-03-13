@@ -1,5 +1,5 @@
 Properties props = new Properties()
-File propsFile = file('../local.properties')
+File propsFile = file('../keys.properties')
 if (propsFile.exists()) {
     props.load(propsFile.newDataInputStream())
 } else if (System.env.STORE_FILE != null &&
