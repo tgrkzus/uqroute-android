@@ -48,6 +48,50 @@ public class LocationListActivity extends ListActivity {
         }
     };
 
+    static private Comparator<Location> sortByBuildingNumber = new Comparator<Location>() {
+        @Override
+        public int compare(Location lhs, Location rhs) {
+            int order = 0;
+            try {
+                int l = Integer.parseInt(lhs.buildingNum);
+                int r = Integer.parseInt(rhs.buildingNum);
+                order = l < r ? -1 : l == r ? 0 : 1;
+            }
+            catch (NumberFormatException e) {
+                // Then one/both of building numbers has a letter in it
+                // Thanks magic regex: https://stackoverflow.com/questions/10372862/java-string-remove-all-non-numeric-characters
+                String l = lhs.buildingNum.replaceAll("[^\\d.]", "");
+                String r = rhs.buildingNum.replaceAll("[^\\d.]", "");
+
+                // Just the number
+                int lInt = Integer.parseInt(l);
+                int rInt = Integer.parseInt(r);
+
+                // Just the letters (if they exist)
+                String lLetter = lhs.buildingNum.replace(l, "");
+                String rLetter = rhs.buildingNum.replace(r, "");
+
+
+                if (l != lhs.buildingNum && r != rhs.buildingNum) {
+                    // Both have letters
+
+                    if (lInt != rInt) {
+                        order = lInt < rInt ? -1 : lInt == rInt ? 0 : 1;
+                    }
+                    else {
+                        // Same numbers we have to sort by letters
+                        order = lLetter.compareToIgnoreCase(rLetter);
+                    }
+                }
+                else {
+                    order = lInt < rInt ? -1 : lInt == rInt ? 0 : 1;
+                }
+            }
+
+            return order;
+        }
+    };
+
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
@@ -134,7 +178,7 @@ public class LocationListActivity extends ListActivity {
 
         // Sort list of locations alphabetically
 
-        Collections.sort(l, sortByName);
+        Collections.sort(l, sortByBuildingNumber);
 
         return l;
     }
