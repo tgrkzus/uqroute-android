@@ -7,8 +7,17 @@
     android:id="@+id/activity_location_list"
     tools:context="com.uqroute.uqroute.LocationListActivity">
 
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/location_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"/>
+
+
     <ListView
-        android:id="@android:id/list"
+        android:id="@+id/location_list_view"
         android:layout_height="wrap_content"
         android:layout_width="match_parent">
     </ListView>

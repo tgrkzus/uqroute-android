@@ -7,6 +7,7 @@ import java.util.ArrayList;
 // Android imports
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -20,6 +21,10 @@ import android.view.MenuItem;
 import android.view.MenuInflater;
 
 // Mapzen imports
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.appindexing.Thing;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.mapzen.android.core.MapzenManager;
 import com.mapzen.android.graphics.MapFragment;
 import com.mapzen.android.graphics.MapzenMap;
@@ -36,6 +41,7 @@ import com.mapzen.android.routing.MapzenRouter;
 import com.mapzen.valhalla.Route;
 import com.mapzen.valhalla.RouteCallback;
 
+// TODO split this class into a lot of other classes
 public class MainActivity extends AppCompatActivity implements
         LostApiClient.ConnectionCallbacks {
 
@@ -165,6 +171,11 @@ public class MainActivity extends AppCompatActivity implements
             map.clearRouteLine();
         }
     };
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client2;
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -185,8 +196,6 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-
         // Setup content view
         //this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
@@ -194,7 +203,6 @@ public class MainActivity extends AppCompatActivity implements
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         getSupportActionBar().setDisplayUseLogoEnabled(true);
         getSupportActionBar().setIcon(R.mipmap.launcher_icon);
-
 
         // Setup location services
         initialize_location_services();
@@ -222,6 +230,9 @@ public class MainActivity extends AppCompatActivity implements
                 connect();
             }
         });
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client2 = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
     private void initialize_location_services() {
@@ -238,7 +249,7 @@ public class MainActivity extends AppCompatActivity implements
 
         // Generate latlng
         List<LngLat> list = new ArrayList<LngLat>();
-        for (ValhallaLocation l : r.getGeometry()){
+        for (ValhallaLocation l : r.getGeometry()) {
             list.add(new LngLat(l.getLongitude(), l.getLatitude()));
         }
         map.drawRouteLine(list);
@@ -273,7 +284,7 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch(item.getItemId()) {
+        switch (item.getItemId()) {
             case R.id.action_settings:
                 if (BuildConfig.DEBUG) {
                     Log.d(ACTIVITY_TAG, "Settings activated");
@@ -298,8 +309,7 @@ public class MainActivity extends AppCompatActivity implements
 
         if (permission == PackageManager.PERMISSION_GRANTED) {
             return true;
-        }
-        else {
+        } else {
             if (!queryingPermissions) {
                 queryingPermissions = true;
                 ActivityCompat.requestPermissions(this,
@@ -309,6 +319,7 @@ public class MainActivity extends AppCompatActivity implements
             return false;
         }
     }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
@@ -340,8 +351,7 @@ public class MainActivity extends AppCompatActivity implements
 
             // Get current location
             l = LocationServices.FusedLocationApi.getLastLocation(client);
-        }
-        catch (SecurityException e) {
+        } catch (SecurityException e) {
             if (BuildConfig.DEBUG) {
                 Log.d(TAG, "Security exception when fetching location" + e.getMessage());
             }
@@ -388,8 +398,8 @@ public class MainActivity extends AppCompatActivity implements
 
     private void refresh_route() {
         router.clearLocations();
-        router.setLocation(new double[] {currentLocation.getLatitude(), currentLocation.getLongitude()});
-        router.setLocation(new double[] {currentTarget.latitude, currentTarget.longitude});
+        router.setLocation(new double[]{currentLocation.getLatitude(), currentLocation.getLongitude()});
+        router.setLocation(new double[]{currentTarget.latitude, currentTarget.longitude});
 
         router.fetch();
     }
@@ -432,8 +442,7 @@ public class MainActivity extends AppCompatActivity implements
                 router.setLocation(start);
                 router.setLocation(end);
                 router.fetch();
-            }
-            else {
+            } else {
                 if (routeEngine.getRoute() != null) {
                     ValhallaLocation loc = new ValhallaLocation();
                     loc.setBearing(l.getBearing());
@@ -443,5 +452,41 @@ public class MainActivity extends AppCompatActivity implements
                 }
             }
         }
+    }
+
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    public Action getIndexApiAction() {
+        Thing object = new Thing.Builder()
+                .setName("Main Page") // TODO: Define a title for the content shown.
+                // TODO: Make sure this auto-generated URL is correct.
+                .setUrl(Uri.parse("http://[ENTER-YOUR-URL-HERE]"))
+                .build();
+        return new Action.Builder(Action.TYPE_VIEW)
+                .setObject(object)
+                .setActionStatus(Action.STATUS_TYPE_COMPLETED)
+                .build();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client2.connect();
+        AppIndex.AppIndexApi.start(client2, getIndexApiAction());
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        AppIndex.AppIndexApi.end(client2, getIndexApiAction());
+        client2.disconnect();
     }
 }

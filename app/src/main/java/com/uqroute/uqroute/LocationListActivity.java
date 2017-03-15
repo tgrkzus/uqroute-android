@@ -2,12 +2,20 @@ package com.uqroute.uqroute;
 
 // Android Imports
 import android.app.ListActivity;
-        import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
 import android.content.Intent;
-        import android.util.Log;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.MenuInflater;
 
 // Mapzen Imports
 
@@ -37,9 +45,11 @@ class Location {
     double longitude;
 }
 
-public class LocationListActivity extends ListActivity {
+public class LocationListActivity extends AppCompatActivity {
+    private ListView lv;
+    private List<Location> locations;
+
     static private final String TAG = "LOCATION_LIST";
-    static private List<Location> locations;
 
     static private Comparator<Location> sortByName = new Comparator<Location>() {
         @Override
@@ -92,32 +102,37 @@ public class LocationListActivity extends ListActivity {
         }
     };
 
-    @Override
-    protected void onListItemClick(ListView l, View v, int position, long id) {
-        super.onListItemClick(l, v, position, id);
+     private ListView.OnItemClickListener itemClickListener = new ListView.OnItemClickListener() {
+         @Override
+         public void onItemClick(AdapterView<?> l, View v, int position, long id) {
+             if (BuildConfig.DEBUG) {
+                 Log.d(TAG, "Item " + id + " clicked: " + l.getItemAtPosition(position));
+             }
 
-        if (BuildConfig.DEBUG) {
-            Log.d(TAG, "Item " + id + " clicked: " + l.getItemAtPosition(position));
-        }
-
-        // Reroute to new location
-        Intent i = new Intent();
-        double[] data;
-        data = new double[] {locations.get((int) id).latitude, locations.get((int) id).longitude};
-        i.putExtra("NEW_LOCATION", data);
-        setResult(RESULT_OK, i);
-        finish();
-    }
+             // Reroute to new location
+             Intent i = new Intent();
+             double[] data;
+             data = new double[]{locations.get((int) id).latitude, locations.get((int) id).longitude};
+             i.putExtra("NEW_LOCATION", data);
+             setResult(RESULT_OK, i);
+             finish();
+         }
+     };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_location_list);
+        setSupportActionBar((Toolbar) findViewById(R.id.location_toolbar));
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        getSupportActionBar().setDisplayUseLogoEnabled(true);
+        getSupportActionBar().setIcon(R.mipmap.launcher_icon);
+
         if (BuildConfig.DEBUG) {
             Log.d(TAG, "Location list initialized");
         }
 
-        // ListView l = (ListView) this.findViewById(R.id.st);
+        ListView lv = (ListView) this.findViewById(R.id.location_list_view);
 
         // Populate list (TODO error handling better)
         locations = fetch_json();
@@ -126,10 +141,37 @@ public class LocationListActivity extends ListActivity {
             values.add(b.buildingNum + " | " + b.name);
         }
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_list_item_1, values);
 
-        setListAdapter(adapter);
+        lv.setAdapter(adapter);
+        lv.setOnItemClickListener(itemClickListener);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.location_list_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()) {
+            case R.id.action_settings:
+                if (BuildConfig.DEBUG) {
+                    Log.d(TAG, "Settings activated");
+                }
+                break;
+            case R.id.action_target:
+                if (BuildConfig.DEBUG) {
+                    Log.d(TAG, "Sorting menu activated");
+                }
+                // Open sorting menu
+                break;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     private ArrayList<Location> fetch_json() {
