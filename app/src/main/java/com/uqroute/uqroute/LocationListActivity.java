@@ -16,6 +16,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuInflater;
+import android.widget.PopupMenu;
 
 // Mapzen Imports
 
@@ -45,9 +46,10 @@ class Location {
     double longitude;
 }
 
-public class LocationListActivity extends AppCompatActivity {
+public class LocationListActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener {
     private ListView lv;
     private List<Location> locations;
+    private Comparator<Location> sortType;
 
     static private final String TAG = "LOCATION_LIST";
 
@@ -132,6 +134,8 @@ public class LocationListActivity extends AppCompatActivity {
             Log.d(TAG, "Location list initialized");
         }
 
+        // Setup list
+        sortType = sortByBuildingNumber;
         ListView lv = (ListView) this.findViewById(R.id.location_list_view);
 
         // Populate list (TODO error handling better)
@@ -168,10 +172,28 @@ public class LocationListActivity extends AppCompatActivity {
                     Log.d(TAG, "Sorting menu activated");
                 }
                 // Open sorting menu
+                PopupMenu popup = new PopupMenu(this, findViewById(R.id.location_toolbar));
+                MenuInflater inflater = popup.getMenuInflater();
+                inflater.inflate(R.menu.sorting_popup_menu, popup.getMenu());
+                popup.show();
                 break;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+        switch(item.getItemId()) {
+            case R.id.sort_by_name:
+                sortType = sortByName;
+                return true;
+            case R.id.sort_by_building_number:
+                sortType = sortByBuildingNumber;
+                return true;
+            default:
+                return false;
+        }
     }
 
     private ArrayList<Location> fetch_json() {
