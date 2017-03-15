@@ -1,12 +1,18 @@
 apply plugin: 'com.android.application'
 
+def Properties props = new Properties()
+def propFile = file('src/main/res/keys.properties')
+if (propFile.canRead()) {
+    props.load(new FileInputStream(propFile))
+}
+
 android {
     signingConfigs {
         config {
             keyAlias 'release_key'
-            keyPassword KEY_PASS
-            storeFile file(STORE_FILE)
-            storePassword STORE_PASS
+            keyPassword props.getProperty("KEY_PASS")
+            storeFile file(props.getProperty("STORE_FILE"))
+            storePassword props.getProperty("STORE_PASS")
         }
     }
     compileSdkVersion 25
@@ -27,11 +33,11 @@ android {
 
         debug {
             //buildConfigField BOOLEAN, "DEBUG", TRUE
-            buildConfigField STRING, "MAPZEN_KEY", "\"${MAPZEN_KEY_DEV}\""
+            buildConfigField STRING, "MAPZEN_KEY", "\"${props.getProperty("MAPZEN_KEY_DEV")}\""
         }
         release {
             //buildConfigField BOOLEAN, "DEBUG", FALSE
-            buildConfigField STRING, "MAPZEN_KEY", "\"${MAPZEN_KEY_PROD}\""
+            buildConfigField STRING, "MAPZEN_KEY", "\"${props.getProperty("MAPZEN_KEY_PROD")}\""
 
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'

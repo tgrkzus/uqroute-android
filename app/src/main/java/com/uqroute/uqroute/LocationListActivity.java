@@ -41,6 +41,13 @@ public class LocationListActivity extends ListActivity {
     static private final String TAG = "LOCATION_LIST";
     static private List<Location> locations;
 
+    static private Comparator<Location> sortByName = new Comparator<Location>() {
+        @Override
+        public int compare(Location lhs, Location rhs) {
+            return lhs.name.compareToIgnoreCase(rhs.name);
+        }
+    };
+
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
@@ -126,12 +133,8 @@ public class LocationListActivity extends ListActivity {
         }
 
         // Sort list of locations alphabetically
-        Collections.sort(l, new Comparator<Location>() {
-            @Override
-            public int compare(Location lhs, Location rhs) {
-                return lhs.name.compareToIgnoreCase(rhs.name);
-            }
-        });
+
+        Collections.sort(l, sortByName);
 
         return l;
     }
