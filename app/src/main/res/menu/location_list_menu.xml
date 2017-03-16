@@ -14,7 +14,7 @@
     <item
         android:id="@+id/action_sorting_options"
         android:orderInCategory="200"
-        android:title="Search"
+        android:title="@string/sorting_options"
         android:icon="@drawable/ic_action_sorting_light"
         app:showAsAction="ifRoom" />
 

@@ -46,7 +46,7 @@ class Location {
     double longitude;
 }
 
-public class LocationListActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener {
+public class LocationListActivity extends AppCompatActivity { 
     private ListView lv;
     private List<Location> locations;
     private Comparator<Location> sortType;
@@ -104,22 +104,41 @@ public class LocationListActivity extends AppCompatActivity implements PopupMenu
         }
     };
 
-     private ListView.OnItemClickListener itemClickListener = new ListView.OnItemClickListener() {
-         @Override
-         public void onItemClick(AdapterView<?> l, View v, int position, long id) {
-             if (BuildConfig.DEBUG) {
-                 Log.d(TAG, "Item " + id + " clicked: " + l.getItemAtPosition(position));
-             }
 
-             // Reroute to new location
-             Intent i = new Intent();
-             double[] data;
-             data = new double[]{locations.get((int) id).latitude, locations.get((int) id).longitude};
-             i.putExtra("NEW_LOCATION", data);
-             setResult(RESULT_OK, i);
-             finish();
-         }
-     };
+    private PopupMenu.OnMenuItemClickListener menuListener = new PopupMenu.OnMenuItemClickListener() {
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+            switch(item.getItemId()) {
+                case R.id.sort_by_name:
+                    sortType = sortByName;
+                    refresh_location_list();
+                    return true;
+                case R.id.sort_by_building_number:
+                    sortType = sortByBuildingNumber;
+                    refresh_location_list();
+                    return true;
+                default:
+                    return false;
+            }
+        }
+    };
+
+    private ListView.OnItemClickListener itemClickListener = new ListView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> l, View v, int position, long id) {
+            if (BuildConfig.DEBUG) {
+                Log.d(TAG, "Item " + id + " clicked: " + l.getItemAtPosition(position));
+            }
+
+            // Reroute to new location
+            Intent i = new Intent();
+            double[] data;
+            data = new double[]{locations.get((int) id).latitude, locations.get((int) id).longitude};
+            i.putExtra("NEW_LOCATION", data);
+            setResult(RESULT_OK, i);
+            finish();
+        }
+    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -134,21 +153,8 @@ public class LocationListActivity extends AppCompatActivity implements PopupMenu
             Log.d(TAG, "Location list initialized");
         }
 
-        // Setup list
         sortType = sortByBuildingNumber;
-        ListView lv = (ListView) this.findViewById(R.id.location_list_view);
-
-        // Populate list (TODO error handling better)
-        locations = fetch_json();
-        List<String> values = new ArrayList<>();
-        for (Location b : locations) {
-            values.add(b.buildingNum + " | " + b.name);
-        }
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_list_item_1, values);
-
-        lv.setAdapter(adapter);
+        refresh_location_list();
         lv.setOnItemClickListener(itemClickListener);
     }
 
@@ -167,14 +173,15 @@ public class LocationListActivity extends AppCompatActivity implements PopupMenu
                     Log.d(TAG, "Settings activated");
                 }
                 break;
-            case R.id.action_target:
+            case R.id.action_sorting_options:
                 if (BuildConfig.DEBUG) {
                     Log.d(TAG, "Sorting menu activated");
                 }
                 // Open sorting menu
-                PopupMenu popup = new PopupMenu(this, findViewById(R.id.location_toolbar));
+                PopupMenu popup = new PopupMenu(this, findViewById(R.id.action_sorting_options));
                 MenuInflater inflater = popup.getMenuInflater();
                 inflater.inflate(R.menu.sorting_popup_menu, popup.getMenu());
+                popup.setOnMenuItemClickListener(menuListener);
                 popup.show();
                 break;
         }
@@ -182,18 +189,28 @@ public class LocationListActivity extends AppCompatActivity implements PopupMenu
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public boolean onMenuItemClick(MenuItem item) {
-        switch(item.getItemId()) {
-            case R.id.sort_by_name:
-                sortType = sortByName;
-                return true;
-            case R.id.sort_by_building_number:
-                sortType = sortByBuildingNumber;
-                return true;
-            default:
-                return false;
+
+    private void refresh_location_list() {
+        // Setup list
+        lv = (ListView) this.findViewById(R.id.location_list_view);
+
+        // Populate list (TODO error handling better)
+        if (locations == null) {
+            locations = fetch_json();
         }
+
+        // Sort list of locations
+        Collections.sort(locations, sortType);
+
+        List<String> values = new ArrayList<>();
+        for (Location b : locations) {
+            values.add(b.buildingNum + " | " + b.name);
+        }
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_list_item_1, values);
+
+        lv.setAdapter(adapter);
     }
 
     private ArrayList<Location> fetch_json() {
@@ -239,11 +256,6 @@ public class LocationListActivity extends AppCompatActivity implements PopupMenu
             }
             return null;
         }
-
-        // Sort list of locations alphabetically
-
-        Collections.sort(l, sortByBuildingNumber);
-
         return l;
     }
 }

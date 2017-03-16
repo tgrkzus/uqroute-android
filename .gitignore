@@ -1,5 +1,13 @@
 /build
 app/build
 .idea/
+app/src/main/res/keys.properties
+*~
 local.properties
 gradle.properties
+
+### VIM ###
+[._]*s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-v[a-z]
+[._]swp[a-p]

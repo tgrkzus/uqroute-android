@@ -5,6 +5,9 @@ def propFile = file('src/main/res/keys.properties')
 if (propFile.canRead()) {
     props.load(new FileInputStream(propFile))
 }
+else {
+    // Exit with error
+}
 
 android {
     signingConfigs {
@@ -14,6 +17,9 @@ android {
             storeFile file(props.getProperty("STORE_FILE"))
             storePassword props.getProperty("STORE_PASS")
         }
+    }
+    lintOptions {
+        disable 'InvalidPackage'
     }
     compileSdkVersion 25
     buildToolsVersion "25.0.2"
