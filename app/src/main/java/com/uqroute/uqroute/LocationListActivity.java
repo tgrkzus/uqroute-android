@@ -1,4 +1,5 @@
 package com.uqroute.uqroute;
+import com.uqroute.uqroute.LocationListAdapter;
 
 // Android Imports
 import android.app.ListActivity;
@@ -6,12 +7,13 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.content.Intent;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ListView;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,7 +25,6 @@ import android.widget.PopupMenu;
 // Java Imports
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
@@ -31,6 +32,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+
 
 class Location {
     public Location(String name, String buildingNum, double latitude, double longitude) {
@@ -47,7 +49,7 @@ class Location {
 }
 
 public class LocationListActivity extends AppCompatActivity { 
-    private ListView lv;
+    private RecyclerView rv;
     private List<Location> locations;
     private Comparator<Location> sortType;
 
@@ -123,7 +125,8 @@ public class LocationListActivity extends AppCompatActivity {
         }
     };
 
-    private ListView.OnItemClickListener itemClickListener = new ListView.OnItemClickListener() {
+    /*
+    private RecyclerView.On itemClickListener = new ListView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> l, View v, int position, long id) {
             if (BuildConfig.DEBUG) {
@@ -139,6 +142,7 @@ public class LocationListActivity extends AppCompatActivity {
             finish();
         }
     };
+    */
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -155,7 +159,7 @@ public class LocationListActivity extends AppCompatActivity {
 
         sortType = sortByBuildingNumber;
         refresh_location_list();
-        lv.setOnItemClickListener(itemClickListener);
+        //rv.setOnClickListener(itemClickListener);
     }
 
     @Override
@@ -192,7 +196,7 @@ public class LocationListActivity extends AppCompatActivity {
 
     private void refresh_location_list() {
         // Setup list
-        lv = (ListView) this.findViewById(R.id.location_list_view);
+        rv = (RecyclerView) this.findViewById(R.id.location_list_view);
 
         // Populate list (TODO error handling better)
         if (locations == null) {
@@ -201,16 +205,13 @@ public class LocationListActivity extends AppCompatActivity {
 
         // Sort list of locations
         Collections.sort(locations, sortType);
+        LocationListAdapter adapter = new LocationListAdapter(locations);
 
-        List<String> values = new ArrayList<>();
-        for (Location b : locations) {
-            values.add(b.buildingNum + " | " + b.name);
-        }
+        // Linear layout
+        RecyclerView.LayoutManager layout = new LinearLayoutManager(this);
+        rv.setLayoutManager(layout);
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_list_item_1, values);
-
-        lv.setAdapter(adapter);
+        rv.setAdapter(adapter);
     }
 
     private ArrayList<Location> fetch_json() {
