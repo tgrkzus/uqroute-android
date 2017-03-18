@@ -1,6 +1,7 @@
 package com.uqroute.uqroute;
 
 import android.support.v7.widget.RecyclerView;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,6 +39,9 @@ public class LocationListAdapter extends RecyclerView.Adapter<LocationListAdapte
     public void onBindViewHolder(ViewHolder holder, int position) {
         holder.name.setText(data.get(position).name);
         holder.buildingNumber.setText(data.get(position).buildingNum);
+
+        holder.name.setGravity(Gravity.CENTER_HORIZONTAL);
+        holder.buildingNumber.setGravity(Gravity.CENTER_HORIZONTAL);
     }
 
     @Override

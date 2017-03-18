@@ -347,6 +347,10 @@ public class MainActivity extends AppCompatActivity implements
                 .setSmallestDisplacement(10);
         Location l = null;
         try {
+            if (client == null) {
+                initialize_location_services();
+            }
+
             LocationServices.FusedLocationApi.requestLocationUpdates(client, request, listener);
 
             // Get current location
