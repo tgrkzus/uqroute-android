@@ -1,23 +1,17 @@
 package com.uqroute.uqroute;
-import com.uqroute.uqroute.LocationListAdapter;
 
 // Android Imports
-import android.app.ListActivity;
-import android.support.v4.app.FragmentActivity;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.content.Intent;
-import android.support.v7.widget.LinearLayoutManager;
+        import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
-import android.view.Menu;
+        import android.support.v7.widget.RecyclerView;
+        import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuInflater;
+import android.view.View;
 import android.widget.PopupMenu;
 
 // Mapzen Imports
@@ -48,7 +42,7 @@ class Location {
     double longitude;
 }
 
-public class LocationListActivity extends AppCompatActivity { 
+public class LocationListActivity extends AppCompatActivity {
     private RecyclerView rv;
     private List<Location> locations;
     private Comparator<Location> sortType;
@@ -106,43 +100,23 @@ public class LocationListActivity extends AppCompatActivity {
         }
     };
 
-
     private PopupMenu.OnMenuItemClickListener menuListener = new PopupMenu.OnMenuItemClickListener() {
         @Override
         public boolean onMenuItemClick(MenuItem item) {
             switch(item.getItemId()) {
                 case R.id.sort_by_name:
                     sortType = sortByName;
-                    refresh_location_list();
+                    refreshLocationList();
                     return true;
                 case R.id.sort_by_building_number:
                     sortType = sortByBuildingNumber;
-                    refresh_location_list();
+                    refreshLocationList();
                     return true;
                 default:
                     return false;
             }
         }
     };
-
-    /*
-    private RecyclerView.On itemClickListener = new ListView.OnItemClickListener() {
-        @Override
-        public void onItemClick(AdapterView<?> l, View v, int position, long id) {
-            if (BuildConfig.DEBUG) {
-                Log.d(TAG, "Item " + id + " clicked: " + l.getItemAtPosition(position));
-            }
-
-            // Reroute to new location
-            Intent i = new Intent();
-            double[] data;
-            data = new double[]{locations.get((int) id).latitude, locations.get((int) id).longitude};
-            i.putExtra("NEW_LOCATION", data);
-            setResult(RESULT_OK, i);
-            finish();
-        }
-    };
-    */
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -158,8 +132,8 @@ public class LocationListActivity extends AppCompatActivity {
         }
 
         sortType = sortByBuildingNumber;
-        refresh_location_list();
-        //rv.setOnClickListener(itemClickListener);
+        refreshLocationList();
+        //rv.setOnTouchListener(itemClickListener);
     }
 
     @Override
@@ -193,14 +167,22 @@ public class LocationListActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    public void locationClick(int id) {
+        Intent i = new Intent();
+        double[] data;
+        data = new double[]{locations.get(id).latitude, locations.get(id).longitude};
+        i.putExtra("NEW_LOCATION", data);
+        setResult(RESULT_OK, i);
+        finish();
+    }
 
-    private void refresh_location_list() {
+    private void refreshLocationList() {
         // Setup list
         rv = (RecyclerView) this.findViewById(R.id.location_list_view);
 
         // Populate list (TODO error handling better)
         if (locations == null) {
-            locations = fetch_json();
+            locations = fetchJson();
         }
 
         // Sort list of locations
@@ -214,7 +196,7 @@ public class LocationListActivity extends AppCompatActivity {
         rv.setAdapter(adapter);
     }
 
-    private ArrayList<Location> fetch_json() {
+    private ArrayList<Location> fetchJson() {
         String json;
         try {
             InputStream is = getAssets().open("location.cache");

@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity implements
             if (BuildConfig.DEBUG) {
                 Log.d(TAG, "Location: " + location);
             }
-            set_location(location);
+            setLocation(location);
         }
 
         @Override
@@ -123,7 +123,7 @@ public class MainActivity extends AppCompatActivity implements
             }
             router.clearLocations();
 
-            refresh_route();
+            refreshRoute();
         }
 
         @Override
@@ -188,7 +188,7 @@ public class MainActivity extends AppCompatActivity implements
 
                 LngLat loc = new LngLat(info[1], info[0]);
 
-                set_target(loc);
+                setTarget(loc);
             }
         }
     }
@@ -205,7 +205,7 @@ public class MainActivity extends AppCompatActivity implements
         getSupportActionBar().setIcon(R.mipmap.launcher_icon);
 
         // Setup location services
-        initialize_location_services();
+        initializeLocationServices();
 
         onSearchRequested();
 
@@ -235,7 +235,7 @@ public class MainActivity extends AppCompatActivity implements
         client2 = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
-    private void initialize_location_services() {
+    private void initializeLocationServices() {
         if (trackingLocation) {
             if (getLocationPermissions()) {
                 client = new LostApiClient.Builder(this).addConnectionCallbacks(this).build();
@@ -243,7 +243,7 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    private void draw_route(Route r) {
+    private void drawRoute(Route r) {
         // Clean current route drawing
         map.clearRouteLine();
 
@@ -329,7 +329,7 @@ public class MainActivity extends AppCompatActivity implements
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // Granted
-                    initialize_location_services();
+                    initializeLocationServices();
                     connect();
                 } else {
                     // Denied
@@ -348,7 +348,7 @@ public class MainActivity extends AppCompatActivity implements
         Location l = null;
         try {
             if (client == null) {
-                initialize_location_services();
+                initializeLocationServices();
             }
 
             LocationServices.FusedLocationApi.requestLocationUpdates(client, request, listener);
@@ -363,7 +363,7 @@ public class MainActivity extends AppCompatActivity implements
 
         if (l != null) {
             // Set new location
-            set_location(l);
+            setLocation(l);
         }
     }
 
@@ -400,7 +400,7 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    private void refresh_route() {
+    private void refreshRoute() {
         router.clearLocations();
         router.setLocation(new double[]{currentLocation.getLatitude(), currentLocation.getLongitude()});
         router.setLocation(new double[]{currentTarget.latitude, currentTarget.longitude});
@@ -408,16 +408,16 @@ public class MainActivity extends AppCompatActivity implements
         router.fetch();
     }
 
-    private void set_target(LngLat p) {
+    private void setTarget(LngLat p) {
         if (BuildConfig.DEBUG) {
             Log.d(TAG, "New target set: " + p.latitude + ", " + p.longitude);
         }
 
         currentTarget = p;
-        refresh_route();
+        refreshRoute();
     }
 
-    private void set_location(Location l) {
+    private void setLocation(Location l) {
         currentLocation = l;
         if (map != null && routing) {
             // Setup/Update routing
@@ -432,7 +432,7 @@ public class MainActivity extends AppCompatActivity implements
                         }
                         routeEngine.setRoute(route);
 
-                        draw_route(route);
+                        drawRoute(route);
                     }
 
                     @Override
