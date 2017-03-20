@@ -2,9 +2,11 @@ package com.uqroute.uqroute;
 
 // Android Imports
 import android.content.Intent;
+import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-        import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
         import android.support.v7.widget.RecyclerView;
@@ -17,7 +19,7 @@ import android.widget.PopupMenu;
 // Mapzen Imports
 
 // Java Imports
-import org.json.JSONException;
+ import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.IOException;
 import java.io.InputStream;
@@ -133,6 +135,8 @@ public class LocationListActivity extends AppCompatActivity {
 
         sortType = sortByBuildingNumber;
         refreshLocationList();
+
+        // Setup
         //rv.setOnTouchListener(itemClickListener);
     }
 
@@ -190,10 +194,15 @@ public class LocationListActivity extends AppCompatActivity {
         LocationListAdapter adapter = new LocationListAdapter(locations);
 
         // Linear layout
-        RecyclerView.LayoutManager layout = new LinearLayoutManager(this);
-        rv.setLayoutManager(layout);
+        LinearLayoutManager layout = new LinearLayoutManager(this);
+
+        // Decor
+        DividerItemDecoration divider = new DividerItemDecoration(rv.getContext(),
+                layout.getOrientation());
+        rv.addItemDecoration(divider);
 
         rv.setAdapter(adapter);
+        rv.setLayoutManager(layout);
     }
 
     private ArrayList<Location> fetchJson() {

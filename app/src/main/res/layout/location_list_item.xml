@@ -8,7 +8,6 @@
     android:focusable="true"
     android:orientation="vertical" >
 
-
     <TextView
         android:id="@+id/location_list_num"
         android:layout_width="wrap_content"
