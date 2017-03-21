@@ -6,12 +6,6 @@
     tools:context=".LocationListActivity">
 
     <item
-        android:id="@+id/action_settings"
-        android:orderInCategory="100"
-        android:title="@string/action_settings"
-        app:showAsAction="never" />
-
-    <item
         android:id="@+id/action_sorting_options"
         android:orderInCategory="200"
         android:title="@string/sorting_options"
