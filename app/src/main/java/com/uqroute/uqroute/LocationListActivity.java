@@ -56,6 +56,8 @@ public class LocationListActivity extends AppCompatActivity {
     private ActionBarDrawerToggle drawerToggle;
     private DrawerLayout drawerLayout;
     private ListView drawerList;
+
+    // TODO icons and such
     static private String[] drawerOptions = {
             "Your Timetable",
             "Your Favourites",
